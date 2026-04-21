@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora CLT vs PJ Kords</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.10);
+    --border-md: rgba(0,0,0,0.18);
+    --text: #1a1a18;
+    --text-muted: #6b6b66;
+    --text-hint: #9b9b96;
+    --green-bg: #E1F5EE;
+    --green-text: #085041;
+    --green-accent: #0F6E56;
+    --amber-bg: #FAEEDA;
+    --amber-text: #633806;
+    --red-text: #A32D2D;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    background: #1a1a18;
+    color: #fff;
+    padding: 2rem 1.5rem 1.75rem;
+    text-align: center;
+  }
+  header .kords-logo {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 10px;
+  }
+  header h1 {
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  header p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.55);
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    margin-bottom: 10px;
+    margin-top: 1.75rem;
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    padding: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .input-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .input-row:first-child { padding-top: 0; }
+
+  .input-label { flex: 1; }
+  .input-label strong { display: block; font-size: 14px; font-weight: 500; }
+  .input-label small { display: block; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .currency-wrap { display: flex; align-items: center; gap: 6px; }
+  .currency-wrap span { font-size: 13px; color: var(--text-muted); }
+  .currency-wrap input[type=number] {
+    width: 120px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: right;
+    border: 0.5px solid var(--border-md);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    background: var(--surface2);
+    color: var(--text);
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .currency-wrap input[type=number]::-webkit-inner-spin-button,
+  .currency-wrap input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .currency-wrap input[type=number]:focus { border-color: #1a1a18; background: #fff; }
+
+  .range-wrap { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .range-wrap input[type=range] {
+    flex: 1;
+    height: 4px;
+    cursor: pointer;
+    accent-color: #1a1a18;
+  }
+  .range-out { font-size: 14px; font-weight: 500; min-width: 42px; text-align: right; }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 0.75rem;
+  }
+  @media (max-width: 480px) { .results-grid { grid-template-columns: 1fr; } }
+
+  .metric-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    padding: 1rem 1.25rem;
+  }
+  .metric-card.featured { border-color: var(--green-accent); border-width: 1.5px; }
+  .metric-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .metric-value { font-size: 26px; font-weight: 500; }
+  .metric-value.green { color: var(--green-accent); }
+  .metric-sub { font-size: 12px; color: var(--text-hint); margin-top: 3px; }
+
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 13px;
+  }
+  .breakdown-row:last-child { border-bottom: none; }
+  .breakdown-row.total-row { font-weight: 600; font-size: 14px; padding-top: 10px; }
+  .bl { color: var(--text-muted); }
+  .bv { color: var(--text); }
+  .bv.green { color: var(--green-accent); font-weight: 500; }
+  .bv.muted { color: var(--text-hint); }
+  .bv.red { color: var(--red-text); }
+
+  .benefit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 13px;
+  }
+  .benefit-row:last-child { border-bottom: none; font-weight: 600; font-size: 14px; }
+  .benefit-icon { font-size: 16px; width: 22px; flex-shrink: 0; text-align: center; }
+  .benefit-name { flex: 1; color: var(--text); line-height: 1.4; }
+  .benefit-value { color: var(--green-accent); font-weight: 500; white-space: nowrap; font-size: 13px; }
+
+  .diff-banner {
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-align: center;
+    margin-bottom: 0.75rem;
+  }
+  .diff-banner.positive { background: var(--green-bg); }
+  .diff-banner.negative { background: #FCEBEB; }
+  .diff-banner .diff-label { font-size: 13px; margin-bottom: 4px; }
+  .diff-banner .diff-value { font-size: 32px; font-weight: 600; }
+  .diff-banner.positive .diff-label { color: var(--green-text); }
+  .diff-banner.positive .diff-value { color: var(--green-accent); }
+  .diff-banner.negative .diff-label { color: var(--red-text); }
+  .diff-banner.negative .diff-value { color: var(--red-text); }
+  .diff-banner .diff-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  .ote-faixas {
+    display: flex;
+    gap: 4px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .ote-faixa {
+    flex: 1;
+    min-width: 80px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    text-align: center;
+    font-size: 11px;
+    border: 0.5px solid var(--border);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .ote-faixa.active { background: #1a1a18; border-color: #1a1a18; color: #fff; }
+  .ote-faixa .faixa-range { display: block; font-weight: 600; margin-bottom: 2px; }
+  .ote-faixa .faixa-mult { display: block; color: inherit; opacity: 0.7; }
+  .ote-faixa.active .faixa-mult { opacity: 0.7; color: #fff; }
+
+  footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 12px;
+    color: var(--text-hint);
+    border-top: 0.5px solid var(--border);
+  }
+  footer strong { color: var(--text-muted); }
+
+  @media (max-width: 600px) {
+    .input-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .currency-wrap input[type=number] { width: 100%; }
+    .range-wrap { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kords-logo">Kords</div>
+  <h1>CLT vs PJ — Qual vale mais?</h1>
+  <p>Simule sua remuneração no modelo PJ Kords e veja o valor real com todos os benefícios incluídos.</p>
+</header>
+
+<div class="container">
+
+  <p class="section-title">Seu salário CLT atual</p>
+  <div class="card">
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Salário bruto mensal</strong>
+        <small>Antes dos descontos de INSS e IRRF</small>
+      </div>
+      <div class="currency-wrap"><span>R$</span><input type="number" id="clt-bruto" value="5000" min="1000" max="50000" step="100"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Vale-alimentação / refeição</strong>
+        <small>Valor recebido mensalmente</small>
+      </div>
+      <div class="currency-wrap"><span>R$</span><input type="number" id="clt-va" value="600" min="0" max="3000" step="50"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Vale-transporte</strong>
+        <small>Valor recebido mensalmente</small>
+      </div>
+      <div class="currency-wrap"><span>R$</span><input type="number" id="clt-vt" value="200" min="0" max="1000" step="50"></div>
+    </div>
+  </div>
+
+  <p class="section-title">Parâmetros PJ Kords</p>
+  <div class="card">
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Fixo bruto como PJ</strong>
+        <small>Valor fixo no contrato PJ (antes dos impostos)</small>
+      </div>
+      <div class="currency-wrap"><span>R$</span><input type="number" id="pj-fixo" value="5000" min="1000" max="50000" step="100"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Variável alvo (OTE a 100%)</strong>
+        <small>Valor do variável ao atingir 100% da meta</small>
+      </div>
+      <div class="currency-wrap"><span>R$</span><input type="number" id="ote-target" value="1500" min="0" max="20000" step="100"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">
+        <strong>Atingimento de meta</strong>
+        <small>Percentual da meta atingida no mês</small>
+      </div>
+      <div class="range-wrap">
+        <input type="range" id="ote-pct" min="0" max="150" value="100" step="5">
+        <span class="range-out" id="ote-pct-out">100%</span>
+      </div>
+    </div>
+    <div class="ote-faixas" id="ote-faixas">
+      <div class="ote-faixa" data-min="0" data-max="70"><span class="faixa-range">0–70%</span><span class="faixa-mult">× 0</span></div>
+      <div class="ote-faixa" data-min="71" data-max="85"><span class="faixa-range">71–85%</span><span class="faixa-mult">× 0,5</span></div>
+      <div class="ote-faixa" data-min="86" data-max="99"><span class="faixa-range">86–99%</span><span class="faixa-mult">× 0,7</span></div>
+      <div class="ote-faixa" data-min="100" data-max="119"><span class="faixa-range">100–119%</span><span class="faixa-mult">× 1</span></div>
+      <div class="ote-faixa" data-min="120" data-max="150"><span class="faixa-range">+120%</span><span class="faixa-mult">× 1,5</span></div>
+    </div>
+    <div class="input-row" style="margin-top:12px;">
+      <div class="input-label">
+        <strong>Alíquota de imposto PJ</strong>
+        <small>MEI, Simples Nacional ou outra modalidade</small>
+      </div>
+      <div class="range-wrap">
+        <input type="range" id="tax-pct" min="1" max="15" value="6" step="0.5">
+        <span class="range-out" id="tax-pct-out">6%</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-title">Resultado</p>
+  <div class="results-grid">
+    <div class="metric-card">
+      <div class="metric-label">Líquido CLT estimado</div>
+      <div class="metric-value" id="r-clt-liq">R$ 0</div>
+      <div class="metric-sub">Após INSS + IRRF + benefícios</div>
+    </div>
+    <div class="metric-card featured">
+      <div class="metric-label">Total PJ Kords estimado</div>
+      <div class="metric-value green" id="r-pj-total">R$ 0</div>
+      <div class="metric-sub">Fixo + OTE + todos os benefícios</div>
+    </div>
+  </div>
+
+  <div class="diff-banner positive" id="diff-banner">
+    <div class="diff-label" id="diff-label">Você ganha a mais no modelo PJ Kords</div>
+    <div class="diff-value" id="diff-value">R$ 0</div>
+    <div class="diff-sub">por mês, considerando todos os benefícios</div>
+  </div>
+
+  <p class="section-title">Detalhamento CLT</p>
+  <div class="card">
+    <div class="breakdown-row"><span class="bl">Salário bruto</span><span class="bv" id="d-bruto">—</span></div>
+    <div class="breakdown-row"><span class="bl">(-) INSS</span><span class="bv muted" id="d-inss">—</span></div>
+    <div class="breakdown-row"><span class="bl">(-) IRRF</span><span class="bv muted" id="d-irrf">—</span></div>
+    <div class="breakdown-row"><span class="bl">Líquido no bolso</span><span class="bv" id="d-liq-bolso">—</span></div>
+    <div class="breakdown-row"><span class="bl">(+) Vale-alimentação / refeição</span><span class="bv green" id="d-va">—</span></div>
+    <div class="breakdown-row"><span class="bl">(+) Vale-transporte</span><span class="bv green" id="d-vt">—</span></div>
+    <div class="breakdown-row total-row"><span class="bl">Total efetivo mensal CLT</span><span class="bv" id="d-total-clt">—</span></div>
+  </div>
+
+  <p class="section-title">Detalhamento PJ Kords</p>
+  <div class="card">
+    <div class="breakdown-row"><span class="bl">Fixo bruto PJ</span><span class="bv" id="d-pj-fixo">—</span></div>
+    <div class="breakdown-row"><span class="bl">(-) Impostos PJ</span><span class="bv muted" id="d-pj-tax">—</span></div>
+    <div class="breakdown-row"><span class="bl">Fixo líquido</span><span class="bv" id="d-pj-liq">—</span></div>
+    <div class="breakdown-row"><span class="bl">(+) OTE variável</span><span class="bv green" id="d-pj-ote">—</span></div>
+    <div class="breakdown-row"><span class="bl">(+) Cartão iFood Benefícios</span><span class="bv green">+ R$ 400</span></div>
+    <div class="breakdown-row"><span class="bl">(+) Demais benefícios estimados</span><span class="bv green">+ R$ 760</span></div>
+    <div class="breakdown-row total-row"><span class="bl">Total efetivo mensal PJ</span><span class="bv green" id="d-total-pj">—</span></div>
+  </div>
+
+  <p class="section-title">Benefícios Kords — valor estimado mensal</p>
+  <div class="card">
+    <div class="benefit-row">
+      <span class="benefit-icon">🎵</span>
+      <span class="benefit-name">Aulas de música ilimitadas — Plataforma Kords (Plano Família)</span>
+      <span class="benefit-value">~R$ 150</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">🎂</span>
+      <span class="benefit-name">Day Off de aniversário + gift card R$ 100</span>
+      <span class="benefit-value">~R$ 50</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">💳</span>
+      <span class="benefit-name">Cartão de benefício iFood Benefícios</span>
+      <span class="benefit-value">R$ 400</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">🍔</span>
+      <span class="benefit-name">Assinatura Clube iFood (cupons e descontos em pedidos)</span>
+      <span class="benefit-value">~R$ 30</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">🍿</span>
+      <span class="benefit-name">Desconto em cinemas (Cinemark, Kinoplex e outros)</span>
+      <span class="benefit-value">~R$ 40</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">🎧</span>
+      <span class="benefit-name">Desconto em streamings (Spotify, YouTube Premium)</span>
+      <span class="benefit-value">~R$ 40</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">💊</span>
+      <span class="benefit-name">Desconto em farmácias (Pague Menos, Raia, Drogasil)</span>
+      <span class="benefit-value">~R$ 50</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">🩷</span>
+      <span class="benefit-name">Seguro de vida</span>
+      <span class="benefit-value">~R$ 60</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">⭐</span>
+      <span class="benefit-name">Starbem — 4 consultas médicas mensais</span>
+      <span class="benefit-value">~R$ 120</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">💪</span>
+      <span class="benefit-name">Wellhub (academia e bem-estar)</span>
+      <span class="benefit-value">~R$ 100</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">💼</span>
+      <span class="benefit-name">Assistência PJ — suporte financeiro e contábil</span>
+      <span class="benefit-value">~R$ 80</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">📖</span>
+      <span class="benefit-name">1 livro a cada bimestre para evoluirmos juntos</span>
+      <span class="benefit-value">~R$ 40</span>
+    </div>
+    <div class="benefit-row">
+      <span class="benefit-icon">✅</span>
+      <span class="benefit-name">Total estimado em benefícios</span>
+      <span class="benefit-value">~R$ 1.160/mês</span>
+    </div>
+  </div>
+
+  <p class="section-title">Quanto preciso ganhar de fixo PJ para empatar com meu CLT?</p>
+  <div class="card">
+    <div class="breakdown-row"><span class="bl">Total efetivo CLT (referência)</span><span class="bv" id="eq-clt-ref">—</span></div>
+    <div class="breakdown-row"><span class="bl">Fixo PJ mínimo para empatar (sem OTE)</span><span class="bv" id="eq-pj-min">—</span></div>
+    <div class="breakdown-row total-row"><span class="bl">Fixo PJ mínimo considerando os benefícios</span><span class="bv green" id="eq-pj-benef">—</span></div>
+  </div>
+
+</div>
+
+<footer>
+  <strong>Kords</strong> &nbsp;·&nbsp; Calculadora informativa · Valores de benefícios são estimativas · INSS e IRRF calculados pela tabela 2024
+</footer>
+
+<script>
+const INSS_FAIXAS = [
+  { ate: 1412.00, aliq: 0.075 },
+  { ate: 2666.68, aliq: 0.09 },
+  { ate: 4000.03, aliq: 0.12 },
+  { ate: 7786.02, aliq: 0.14 },
+];
+const IRRF_FAIXAS = [
+  { ate: 2259.20, aliq: 0, ded: 0 },
+  { ate: 2826.65, aliq: 0.075, ded: 169.44 },
+  { ate: 3751.05, aliq: 0.15, ded: 381.44 },
+  { ate: 4664.68, aliq: 0.225, ded: 662.77 },
+  { ate: Infinity, aliq: 0.275, ded: 896.00 },
+];
+const BENEFITS_TOTAL = 1160;
+
+function calcINSS(bruto) {
+  let inss = 0, prev = 0;
+  for (const f of INSS_FAIXAS) {
+    if (bruto <= prev) break;
+    const base = Math.min(bruto, f.ate) - prev;
+    inss += base * f.aliq;
+    prev = f.ate;
+    if (bruto >= 7786.02) { inss = 7786.02 * 0.14; break; }
+  }
+  return inss;
+}
+
+function calcIRRF(bruto, inss) {
+  const base = bruto - inss;
+  for (const f of IRRF_FAIXAS) {
+    if (base <= f.ate) return Math.max(0, base * f.aliq - f.ded);
+  }
+  return 0;
+}
+
+function calcOTEVar(otePct, oteTarget) {
+  if (otePct < 71) return 0;
+  if (otePct <= 85) return oteTarget * 0.5;
+  if (otePct <= 99) return oteTarget * 0.7;
+  if (otePct <= 119) return oteTarget * 1.0;
+  return oteTarget * 1.5;
+}
+
+function fmt(v) {
+  return 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+}
+
+function updateOteFaixas(pct) {
+  document.querySelectorAll('.ote-faixa').forEach(el => {
+    const min = parseInt(el.dataset.min);
+    const max = parseInt(el.dataset.max);
+    el.classList.toggle('active', pct >= min && pct <= max);
+  });
+}
+
+function calculate() {
+  const bruto = parseFloat(document.getElementById('clt-bruto').value) || 0;
+  const va = parseFloat(document.getElementById('clt-va').value) || 0;
+  const vt = parseFloat(document.getElementById('clt-vt').value) || 0;
+  const pjFixo = parseFloat(document.getElementById('pj-fixo').value) || 0;
+  const oteTarget = parseFloat(document.getElementById('ote-target').value) || 0;
+  const otePct = parseFloat(document.getElementById('ote-pct').value) || 0;
+  const taxPct = parseFloat(document.getElementById('tax-pct').value) || 6;
+
+  const inss = calcINSS(bruto);
+  const irrf = calcIRRF(bruto, inss);
+  const liquido = bruto - inss - irrf;
+  const totalCLT = liquido + va + vt;
+
+  const pjTax = pjFixo * (taxPct / 100);
+  const pjLiq = pjFixo - pjTax;
+  const oteVar = calcOTEVar(otePct, oteTarget);
+  const totalPJ = pjLiq + oteVar + BENEFITS_TOTAL;
+
+  const diff = totalPJ - totalCLT;
+
+  document.getElementById('r-clt-liq').textContent = fmt(totalCLT);
+  document.getElementById('r-pj-total').textContent = fmt(totalPJ);
+
+  const banner = document.getElementById('diff-banner');
+  const lbl = document.getElementById('diff-label');
+  const dv = document.getElementById('diff-value');
+  if (diff >= 0) {
+    banner.className = 'diff-banner positive';
+    lbl.textContent = 'Você ganha a mais no modelo PJ Kords';
+    dv.textContent = '+' + fmt(diff);
+  } else {
+    banner.className = 'diff-banner negative';
+    lbl.textContent = 'O CLT é mais vantajoso nessa configuração';
+    dv.textContent = fmt(diff);
+  }
+
+  document.getElementById('d-bruto').textContent = fmt(bruto);
+  document.getElementById('d-inss').textContent = '- ' + fmt(inss);
+  document.getElementById('d-irrf').textContent = '- ' + fmt(irrf);
+  document.getElementById('d-liq-bolso').textContent = fmt(liquido);
+  document.getElementById('d-va').textContent = '+ ' + fmt(va);
+  document.getElementById('d-vt').textContent = '+ ' + fmt(vt);
+  document.getElementById('d-total-clt').textContent = fmt(totalCLT);
+
+  document.getElementById('d-pj-fixo').textContent = fmt(pjFixo);
+  document.getElementById('d-pj-tax').textContent = '- ' + fmt(pjTax);
+  document.getElementById('d-pj-liq').textContent = fmt(pjLiq);
+  document.getElementById('d-pj-ote').textContent = '+ ' + fmt(oteVar);
+  document.getElementById('d-total-pj').textContent = fmt(totalPJ);
+
+  const pjMinSemBenef = totalCLT / (1 - taxPct / 100);
+  const pjMinComBenef = Math.max(0, (totalCLT - BENEFITS_TOTAL)) / (1 - taxPct / 100);
+  document.getElementById('eq-clt-ref').textContent = fmt(totalCLT);
+  document.getElementById('eq-pj-min').textContent = fmt(pjMinSemBenef);
+  document.getElementById('eq-pj-benef').textContent = fmt(pjMinComBenef);
+
+  updateOteFaixas(otePct);
+}
+
+document.getElementById('ote-pct').addEventListener('input', e => {
+  document.getElementById('ote-pct-out').textContent = e.target.value + '%';
+  calculate();
+});
+document.getElementById('tax-pct').addEventListener('input', e => {
+  document.getElementById('tax-pct-out').textContent = parseFloat(e.target.value).toFixed(1) + '%';
+  calculate();
+});
+['clt-bruto','clt-va','clt-vt','pj-fixo','ote-target'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calculate);
+});
+
+calculate();
+</script>
+</body>
+</html>
